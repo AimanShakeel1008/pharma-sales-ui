@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 
 import UploadPage from './pages/UploadPage';
 import DashboardPage from './pages/DashboardPage';
+import DrugTablePage from './pages/DrugTablePage';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Routes>
             <Route path="/" element={<UploadPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/drugs" element={<DrugTablePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
