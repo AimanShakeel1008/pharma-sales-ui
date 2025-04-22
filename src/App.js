@@ -7,7 +7,9 @@ import Footer from './components/Footer';
 import UploadPage from './pages/UploadPage';
 import DashboardPage from './pages/DashboardPage';
 import DrugTablePage from './pages/DrugTablePage';
+import CompanyEstimationPage from './pages/CompanyEstimationPage';
 import NotFound from './pages/NotFound';
+import CountryOverviewPage from './pages/CountryOverviewPage';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
             <Route path="/" element={<UploadPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/drugs" element={<DrugTablePage />} />
+            <Route path="/company-estimation" element={<CompanyEstimationPage />} />
+            <Route path="/country-overview" element={<CountryOverviewPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

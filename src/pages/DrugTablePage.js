@@ -1,48 +1,44 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTable, usePagination, useSortBy } from 'react-table';
-import { Container, Spinner, Button, Form, Row, Col } from 'react-bootstrap';
+import { Container, Spinner, Button, Form, Row, Col, Modal } from 'react-bootstrap';
 import axios from 'axios';
-import { CSVLink } from 'react-csv'; // ✅ Added for Export
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const DrugTablePage = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [quarters, setQuarters] = useState([]);
+  const [quarter, setQuarter] = useState('');
   const [countries, setCountries] = useState([]);
   const [categories, setCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
-  const [quarters, setQuarters] = useState([]);
-  const [quarter, setQuarter] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCompany, setSelectedCompany] = useState('');
   const [searchText, setSearchText] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Fetch available quarters
-  useEffect(() => {
-    const fetchQuarters = async () => {
-      try {
-        const res = await axios.get('http://localhost:8080/api/results/quarters');
-        if (res.data && res.data.length > 0) {
-          setQuarters(res.data);
-          setQuarter(res.data[0]); // Set default quarter
-        }
-      } catch (error) {
-        console.error('Failed to fetch quarters', error);
-      }
-    };
+  const [showModal, setShowModal] = useState(false);
+  const [selectedDrug, setSelectedDrug] = useState(null);
 
-    fetchQuarters();
+  const API_BASE = 'http://localhost:8080/api/results';
+
+  useEffect(() => {
+    axios.get(`${API_BASE}/quarters`)
+      .then((res) => {
+        setQuarters(res.data);
+        if (res.data.length > 0) {
+          setQuarter(res.data[0]);
+        }
+      });
   }, []);
 
-  // Fetch drugs data when quarter changes
   useEffect(() => {
     if (!quarter) return;
 
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`http://localhost:8080/api/results/drugs?quarter=${quarter}`);
+    setLoading(true);
+    axios.get(`${API_BASE}/drugs?quarter=${quarter}`)
+      .then((res) => {
         setData(res.data);
         setFilteredData(res.data);
 
@@ -53,14 +49,11 @@ const DrugTablePage = () => {
         setCountries(uniqueCountries);
         setCategories(uniqueCategories);
         setCompanies(uniqueCompanies);
-      } catch (error) {
-        console.error('Failed to fetch drugs', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      })
+      .catch((err) => {
+        console.error('Failed to fetch', err);
+      })
+      .finally(() => setLoading(false));
   }, [quarter]);
 
   // Handle Filtering
@@ -70,15 +63,12 @@ const DrugTablePage = () => {
     if (selectedCountry !== '') {
       temp = temp.filter(drug => drug.countryName === selectedCountry);
     }
-
     if (selectedCategory !== '') {
       temp = temp.filter(drug => drug.categoryName === selectedCategory);
     }
-
     if (selectedCompany !== '') {
       temp = temp.filter(drug => drug.companyName === selectedCompany);
     }
-
     if (searchText.trim() !== '') {
       temp = temp.filter(drug =>
         drug.drugName.toLowerCase().includes(searchText.toLowerCase())
@@ -87,6 +77,11 @@ const DrugTablePage = () => {
 
     setFilteredData(temp);
   }, [selectedCountry, selectedCategory, selectedCompany, searchText, data]);
+
+  const handleRowClick = (row) => {
+    setSelectedDrug(row.original);
+    setShowModal(true);
+  };
 
   const columns = useMemo(() => [
     { Header: 'Drug Name', accessor: 'drugName' },
@@ -126,9 +121,9 @@ const DrugTablePage = () => {
 
   return (
     <Container className="mt-5">
-      <h3 className="text-center text-primary mb-4">Drug Estimation Table</h3>
+      <h3 className="text-center text-primary mb-4">📋 Drug Estimation Table</h3>
 
-      {/* Quarter Dropdown */}
+      {/* Quarter selection */}
       <Form.Group className="mb-4 text-center">
         <Form.Label><strong>Select Quarter:</strong></Form.Label>
         <Form.Select
@@ -136,25 +131,11 @@ const DrugTablePage = () => {
           onChange={(e) => setQuarter(e.target.value)}
           style={{ maxWidth: '300px', margin: '0 auto' }}
         >
-          {quarters.map((q, idx) => (
-            <option key={idx} value={q}>
-              {q}
-            </option>
+          {quarters.map((q) => (
+            <option key={q} value={q}>{q}</option>
           ))}
         </Form.Select>
       </Form.Group>
-
-      {/* Export Button */}
-      <div className="text-end mb-3">
-        <CSVLink
-          data={filteredData}
-          filename={`drug_estimation_${quarter}.csv`}
-          className="btn btn-outline-success"
-          target="_blank"
-        >
-          📥 Export as CSV
-        </CSVLink>
-      </div>
 
       {/* Filters */}
       <Row className="mb-4">
@@ -167,9 +148,7 @@ const DrugTablePage = () => {
             >
               <option value="">All Countries</option>
               {countries.map((c, idx) => (
-                <option key={idx} value={c}>
-                  {c}
-                </option>
+                <option key={idx} value={c}>{c}</option>
               ))}
             </Form.Select>
           </Form.Group>
@@ -184,9 +163,7 @@ const DrugTablePage = () => {
             >
               <option value="">All Categories</option>
               {categories.map((cat, idx) => (
-                <option key={idx} value={cat}>
-                  {cat}
-                </option>
+                <option key={idx} value={cat}>{cat}</option>
               ))}
             </Form.Select>
           </Form.Group>
@@ -201,9 +178,7 @@ const DrugTablePage = () => {
             >
               <option value="">All Companies</option>
               {companies.map((comp, idx) => (
-                <option key={idx} value={comp}>
-                  {comp}
-                </option>
+                <option key={idx} value={comp}>{comp}</option>
               ))}
             </Form.Select>
           </Form.Group>
@@ -222,7 +197,6 @@ const DrugTablePage = () => {
         </Col>
       </Row>
 
-      {/* Table */}
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" variant="primary" />
@@ -254,7 +228,7 @@ const DrugTablePage = () => {
                 {page.map((row, i) => {
                   prepareRow(row);
                   return (
-                    <tr {...row.getRowProps()}>
+                    <tr {...row.getRowProps()} onClick={() => handleRowClick(row)} style={{ cursor: 'pointer' }}>
                       {row.cells.map(cell => (
                         <td {...cell.getCellProps()}>
                           {cell.render('Cell')}
@@ -285,11 +259,7 @@ const DrugTablePage = () => {
               Last ⏭️
             </Button>
 
-            <Form.Select
-              style={{ width: "100px" }}
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-            >
+            <Form.Select style={{ width: "100px" }} value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
               {[10, 25, 50].map(size => (
                 <option key={size} value={size}>
                   Show {size}
@@ -298,6 +268,38 @@ const DrugTablePage = () => {
             </Form.Select>
           </div>
         </>
+      )}
+
+      {/* Modal for Selected Drug */}
+      {selectedDrug && (
+        <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+          <Modal.Header closeButton>
+            <Modal.Title>{selectedDrug.drugName}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p><strong>Company:</strong> {selectedDrug.companyName}</p>
+            <p><strong>Country:</strong> {selectedDrug.countryName}</p>
+            <p><strong>Category:</strong> {selectedDrug.categoryName}</p>
+            <p><strong>Rank:</strong> {selectedDrug.rank}</p>
+
+            <h5 className="mt-4 text-primary">📈 Sales Trend</h5>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="label" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="sales" data={[{label:"Mean",sales:selectedDrug.estimatedSales},{label:"Min",sales:selectedDrug.minSales},{label:"Max",sales:selectedDrug.maxSales}]} stroke="#8884d8" />
+              </LineChart>
+            </ResponsiveContainer>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       )}
     </Container>
   );

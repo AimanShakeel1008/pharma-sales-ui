@@ -143,9 +143,15 @@ const DashboardPage = () => {
           </Row>
 
           <div className="text-center mt-4">
-            <Button variant="outline-success" onClick={() => navigate('/drugs')}>
-              📋 View Drug-wise Estimation
+          <Button variant="outline-success" className="me-3" onClick={() => navigate('/drugs')}>
+            📋 View Drug-wise Estimation
             </Button>
+          <Button variant="outline-warning" className="me-3" onClick={() => navigate('/company-estimation')}>
+            🏢 View Company Estimation
+          </Button>
+          <Button variant="outline-success" className="me-3" onClick={() => navigate('/country-overview')}>
+            🌍 View Country Overview
+          </Button>
           </div>
 
           {/* Graphs Section */}
