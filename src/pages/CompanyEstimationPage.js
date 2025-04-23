@@ -35,7 +35,7 @@ ChartJS.register(
   ArcElement
 );
 
-const API_BASE = "http://localhost:8080/api/results";
+const API_BASE = "http://13.201.34.246:8080/api/results";
 
 const CompanyEstimationPage = () => {
   const [quarter, setQuarter] = useState("");

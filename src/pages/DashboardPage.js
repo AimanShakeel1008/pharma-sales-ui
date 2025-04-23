@@ -24,7 +24,7 @@ const DashboardPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  const API_BASE = 'http://localhost:8080/api/results';
+  const API_BASE = 'http://13.201.34.246:8080/api/results';
 
   // Load quarters on mount
   useEffect(() => {

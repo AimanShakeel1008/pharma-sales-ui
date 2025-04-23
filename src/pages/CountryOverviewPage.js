@@ -6,7 +6,7 @@ import axios from 'axios';
 
 Chart.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
-const API_BASE = 'http://localhost:8080/api/results';
+const API_BASE = 'http://13.201.34.246:8080/api/results';
 
 const CountryOverviewPage = () => {
   const [quarter, setQuarter] = useState('');

@@ -21,7 +21,7 @@ const DrugTablePage = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedDrug, setSelectedDrug] = useState(null);
 
-  const API_BASE = 'http://localhost:8080/api/results';
+  const API_BASE = 'http://13.201.34.246:8080/api/results';
 
   useEffect(() => {
     axios.get(`${API_BASE}/quarters`)

@@ -19,7 +19,7 @@ const FileUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isEstimating, setIsEstimating] = useState(false);
 
-  const BACKEND_URL = 'http://localhost:8080/api';
+  const BACKEND_URL = 'http://13.201.34.246:8080/api';
 
   // Poll for estimation status
   useEffect(() => {
